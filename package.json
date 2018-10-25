@@ -1,0 +1,25 @@
+{
+  "name": "journal-starter",
+  "version": "0.1.0",
+  "description": "Eating my own dog food",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cuibonobo/journal-starter.git"
+  },
+  "author": "Jen Garcia <jen@haverstack.com> (https://haverstack.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cuibonobo/journal-starter/issues"
+  },
+  "homepage": "https://github.com/cuibonobo/journal-starter#readme",
+  "devDependencies": {
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "typescript": "^3.1.3"
+  }
+}
