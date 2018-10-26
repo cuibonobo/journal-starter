@@ -7,6 +7,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "journal": "./bin/journal"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cuibonobo/journal-starter.git"
@@ -18,8 +21,13 @@
   },
   "homepage": "https://github.com/cuibonobo/journal-starter#readme",
   "devDependencies": {
+    "@types/minimist": "^1.2.0",
+    "@types/node": "^10.12.0",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.15.0",
     "typescript": "^3.1.3"
+  },
+  "dependencies": {
+    "minimist": "^1.2.0"
   }
 }

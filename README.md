@@ -18,18 +18,18 @@ What? _Why_ do I want to create a static site generator when there are so many a
 
 Post IDs are 12-character strings composed of a timestamp concatenated with a random integer. The timestamp and and the random value are both expressed as a [Crockford base32](http://www.crockford.com/wrmg/base32.html) number. This encoding type was chosen because it strikes the right balance between compactness of representation and being human-readable and case-insensitive. The fact that it is case-insensitive is important because two of the most popular operating systems, Windows and OS X, use case-insensitive file systems.
 
-The post ID's timestamp is in 1/1024-second, which makes it close to milliseconds, but more convenient to work with in base 32. The rate of change of each character in the timestamp is as follows:
+The rate of change of each character in the timestamp is as follows:
 
 ```txt
-    1st:    ~every 34 years           (34.025 years)
-    2nd:    ~every year               (1.063 years)
-    3rd:    ~every 12 days            (12.136 days)
-    4th:    ~every 9 hours            (9.102 hours)
-    5th:    ~every 17 minutes         (17.067 minutes)
-    6th:    every 32 seconds
-    7th:    every second
-    8th:    ~every 31 milliseconds    (31.25 milliseconds)
-    9th:    ~every millisecond        (0.976 milliseconds)
+    1st:    ~every 34 years           (34.841 years)
+    2nd:    ~every year               (1.089 years)
+    3rd:    ~every 12 days            (12.428 days)
+    4th:    ~every 9 hours            (9.321 hours)
+    5th:    ~every 17 minutes         (17.476 minutes)
+    6th:    ~every 33 seconds         (32.768 seconds)
+    7th:    ~every second             (1.024 seconds)
+    8th:    every 32 milliseconds
+    9th:    every millisecond
 ```
 
 The timestamp portion of the post ID is expected to have 9 characters until the year 3058, so we shouldn't need to worry about problems arising because of variable post ID lengths.
