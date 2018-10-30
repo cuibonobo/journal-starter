@@ -47,18 +47,15 @@ The data directory will be touched by automated tools most of the time. Hopefull
     │   ├── ...
     │   │
     │   ├── 1ba
-    │   ├── 1ba
     │   │   ├── ...
     │   │   │
-    │   │   ├── 8j
+    │   │   ├── 8jg
     │   │   │   ├── ...
-    │   │   │   │
-    │   │   │   ├── gr
-    │   │   │   │   ├── 1ba8jgrhxvtm.json
-    │   │   │   │   ├── 1ba8jgrhxvtm
-    │   │   │   │   │   ├── photo1.jpg
-    │   │   │   │   │   └── archive.zip
-    │   │   │   │   └── 1ba8jgrj2kje.json
+    │   │   │   ├── 1ba8jgrhxvtm.json
+    │   │   │   ├── 1ba8jgrhxvtm
+    │   │   │   │   ├── photo1.jpg
+    │   │   │   │   └── archive.zip
+    │   │   │   └── 1ba8jgrj2kje.json
     │   │   │   └── ...
     │   │   └── ...
     │   │
