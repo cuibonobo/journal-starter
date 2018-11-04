@@ -5,7 +5,10 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --config jestconfig.json",
+    "lint": "tslint -p tsconfig.json --fix",
+    "build": "tsc",
+    "build-debug": "tsc -w"
   },
   "bin": {
     "journal": "./bin/journal"
@@ -21,8 +24,11 @@
   },
   "homepage": "https://github.com/cuibonobo/journal-starter#readme",
   "devDependencies": {
+    "@types/jest": "^23.3.9",
     "@types/minimist": "^1.2.0",
     "@types/node": "^10.12.0",
+    "jest": "^23.6.0",
+    "ts-jest": "^23.10.4",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.15.0",
     "typescript": "^3.1.3"
