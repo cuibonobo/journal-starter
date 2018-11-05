@@ -19,14 +19,22 @@ export default class Settings {
       });
     });
   }
-  public repositoryDir: string;
+  private settings?:ISettingsJSON;
 
-  constructor() {
-    if (fs.existsSync(Settings.filePath)) {
-      const obj: ISettingsJSON = JSON.parse(fs.readFileSync('file', 'utf8'));
-      this.repositoryDir = obj.repositoryDir;
-    } else {
-      throw Error("No settings file!");
-    }
+  public async readFromFile() {
+    return new Promise((resolve, reject) => {
+      fs.exists(Settings.filePath, (exists:boolean) => {
+        if (!exists) {
+          return reject();
+        }
+        fs.readFile(Settings.filePath, (err, data:Buffer) => {
+          if (err) {
+            return reject(err);
+          }
+          this.settings = JSON.parse(data.toString());
+          resolve();
+        });
+      });
+    });
   }
 }
