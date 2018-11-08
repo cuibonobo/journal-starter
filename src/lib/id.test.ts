@@ -35,3 +35,11 @@ test("ID reflects current time", () => {
   const timestamp = id.substr(0, 9);
   expect(timestamp).toBe(intToCrockford32(now));
 });
+
+test("Consecutive IDs will be different", () => {
+  const idArray = [];
+  for (let i = 0; i < 10; i++) {
+    idArray[i] = generateId();
+  }
+  expect(new Set(idArray).size).toBe(idArray.length);
+});
