@@ -10,9 +10,17 @@ export default class Settings {
     const obj:ISettingsJSON = {repositoryDir};
     await writeFile(Settings.filePath, JSON.stringify(obj));
   }
+
   private settings?:ISettingsJSON;
 
   public async readFromFile() {
     this.settings = JSON.parse(await readFile(Settings.filePath));
+  }
+
+  public getRepositoryDir(): string {
+    if (this.settings === undefined) {
+      throw new Error("No repository defined!");
+    }
+    return this.settings.repositoryDir;
   }
 }

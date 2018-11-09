@@ -38,3 +38,15 @@ export const readFile = (path: string): Promise<string> => {
     });
   });
 };
+
+export const createDirectory = (path: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    fs.mkdir(path, {recursive: true, mode: 0o755},(err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+};

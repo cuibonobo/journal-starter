@@ -2,7 +2,8 @@ import minimist = require("minimist");
 import * as readline from "readline";
 import { generateId } from "./lib/id";
 import { ICommands } from "./lib/interfaces";
-import { Settings } from "./models";
+import { Repository, Settings } from "./models";
+import Post from "./models/Post";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -16,12 +17,22 @@ const ask = async (questionText: string): Promise<string> => {
 };
 
 const COMMANDS: ICommands = {
+  "create": async () => {
+    const settings = new Settings();
+    await settings.readFromFile();
+    const repo = new Repository(settings.getRepositoryDir());
+    const note: string = await ask("What do you want to say?\n");
+    const post = Post.generatePost("note", {"body": note});
+    repo.savePost(post);
+  },
   "generate-id": async () => {
     rl.write(generateId() + "\n");
   },
   "init": async () => {
     const repositoryDir: string = await ask("Where should the data live?\n");
     await Settings.generateSettings(repositoryDir);
+    const repo = new Repository(repositoryDir);
+    repo.initializeRepository();
   }
 };
 
