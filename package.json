@@ -34,6 +34,7 @@
     "typescript": "^3.1.3"
   },
   "dependencies": {
+    "external-editor": "^3.0.3",
     "minimist": "^1.2.0"
   }
 }

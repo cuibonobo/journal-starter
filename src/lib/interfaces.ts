@@ -3,7 +3,7 @@ export interface ISettingsJSON {
 }
 
 export interface ICommands {
-  [key: string]: () => Promise<void>;
+  [key: string]: (args: string[], kwargs: {[key: string]: string | boolean}) => Promise<void>;
 }
 
 export interface IBaseJson {
