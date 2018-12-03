@@ -1,4 +1,3 @@
-import { edit } from "external-editor";
 import { Cli } from "./lib/cli";
 import { generateId } from "./lib/id";
 import { ICommands } from "./lib/interfaces";
@@ -9,7 +8,7 @@ const cli = new Cli();
 const CREATE_COMMANDS: ICommands = {
   "post": async (args, kwargs) => {
     const repo = await getRepository();
-    const note: string = await cli.read("What do you want to say?\n");
+    const note: string = await cli.readLine("What do you want to say?");
     await createPost(repo, "note", {"body": note});
   },
   "type": async (args, kwargs) => {
@@ -17,9 +16,9 @@ const CREATE_COMMANDS: ICommands = {
       console.debug(args);
       return;
     }
-    const data = edit("\n\n# Define your type above.");
+    const data = cli.readBody("Define your type above.");
     console.debug(`New type: ${args[0]}`);
-    console.debug(data);
+    console.debug(JSON.parse(data));
   }
 };
 
@@ -31,7 +30,7 @@ const BASE_COMMANDS: ICommands = {
     cli.write(generateId());
   },
   "init": async () => {
-    const repositoryDir: string = await cli.read("Where should the data live?\n");
+    const repositoryDir: string = await cli.readLine("Where should the data live?");
     await createRepository(repositoryDir);
   }
 };

@@ -1,3 +1,4 @@
+import { edit } from "external-editor";
 import * as minimist from "minimist";
 import * as readline from "readline";
 import { ICommands } from "../lib/interfaces";
@@ -29,14 +30,32 @@ export class Cli {
     });
   }
 
-  public read = async (questionText?: string): Promise<string> => {
+  public readLine = async (questionText?: string): Promise<string> => {
     let text = "";
     if (questionText !== undefined) {
-      text = questionText;
+      text = questionText + "\n";
     }
     return new Promise((resolve: (input: string) => void, reject) => {
       this.rl.question(text, (input) => resolve(input));
     });
+  };
+
+  public readBody = (questionText?: string): string => {
+    let text = "";
+    if (questionText !== undefined) {
+      text = "\n\n# " + questionText;
+    }
+    try {
+      const data = edit(text);
+      const idx = data.indexOf(text);
+      if (idx > -1) {
+        return data.substr(0, idx);
+      }
+      return data;
+    } catch(err) {
+      console.debug(err);
+      return "";
+    }
   };
 
   public write = (message: string): void => {
