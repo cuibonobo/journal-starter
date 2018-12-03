@@ -1,10 +1,9 @@
+import { edit } from "external-editor";
 import minimist = require("minimist");
 import * as readline from "readline";
-import { edit } from "external-editor";
 import { generateId } from "./lib/id";
 import { ICommands } from "./lib/interfaces";
-import { Repository, Settings } from "./models";
-import Post from "./models/Post";
+import { createPost, createRepository, getRepository } from "./procedures";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -19,12 +18,9 @@ const ask = async (questionText: string): Promise<string> => {
 
 const CREATE_COMMANDS: ICommands = {
   "post": async (args, kwargs) => {
-    const settings = new Settings();
-    await settings.readFromFile();
-    const repo = new Repository(settings.getRepositoryDir());
+    const repo = await getRepository();
     const note: string = await ask("What do you want to say?\n");
-    const post = Post.generatePost("note", {"body": note});
-    repo.savePost(post);
+    createPost(repo, "note", {"body": note});
   },
   "type": async (args, kwargs) => {
     if (args.length === 0) {
@@ -50,9 +46,7 @@ const BASE_COMMANDS: ICommands = {
   },
   "init": async () => {
     const repositoryDir: string = await ask("Where should the data live?\n");
-    await Settings.generateSettings(repositoryDir);
-    const repo = new Repository(repositoryDir);
-    repo.initializeRepository();
+    await createRepository(repositoryDir);
   }
 };
 
@@ -60,10 +54,10 @@ const main = async () => {
   const args = minimist(process.argv.slice(2));
   if (args._.length > 0 && Object.keys(BASE_COMMANDS).indexOf(args._[0]) > -1) {
     const command = args._[0];
-    const seq_args = args._.slice(1);
+    const seqArgs = args._.slice(1);
     const kwargs = {...args};
     delete kwargs._;
-    await BASE_COMMANDS[command](seq_args, kwargs);
+    await BASE_COMMANDS[command](seqArgs, kwargs);
   } else {
     console.debug(args);
   }
