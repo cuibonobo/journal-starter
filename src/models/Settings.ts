@@ -1,10 +1,10 @@
 import * as path from "path";
 import { ISettingsJSON } from "../lib/interfaces";
-import { readFile, userDataDir, writeFile } from "../lib/platform";
+import { getUserDataDir, isFile, readFile, writeFile } from "../lib/platform";
 
 export default class Settings {
   public static readonly filename: string = "journal.json";
-  public static readonly filePath = path.join(userDataDir, Settings.filename);
+  public static readonly filePath = path.join(getUserDataDir(), Settings.filename);
 
   public static async generateSettings(repositoryDir: string) {
     const obj:ISettingsJSON = {repositoryDir};
@@ -14,7 +14,9 @@ export default class Settings {
   private settings?:ISettingsJSON;
 
   public async readFromFile() {
-    this.settings = JSON.parse(await readFile(Settings.filePath));
+    if (await isFile(Settings.filePath)) {
+      this.settings = JSON.parse(await readFile(Settings.filePath));
+    }
   }
 
   public getRepositoryDir(): string {
