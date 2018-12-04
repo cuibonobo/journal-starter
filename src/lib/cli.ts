@@ -12,10 +12,20 @@ export class Cli {
     return {args, kwargs};
   };
 
-  public static processCommand = async (commands:ICommands, args:string[], kwargs:{[key:string]: string | boolean}) => {
+  public static processCommand = async (commands:ICommands, cli: Cli | null, args:string[], kwargs:{[key:string]: string | boolean}) => {
     if (args.length > 0 && Object.keys(commands).indexOf(args[0]) > -1) {
+      // Keep track of whether the CLI was created here or passed in
+      let isBase = false;
+      if (cli === null) {
+        cli = new Cli();
+        isBase = true;
+      }
       const command = args[0];
-      await commands[command](args.slice(1), kwargs);
+      await commands[command](cli, args.slice(1), kwargs);
+      // If this was the level where the CLI was created, close the CLI
+      if (isBase) {
+        cli.close();
+      }
     } else {
       console.debug(args, kwargs);
     }

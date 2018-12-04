@@ -3,15 +3,13 @@ import { generateId } from "./lib/id";
 import { ICommands } from "./lib/interfaces";
 import { createPost, createRepository, getRepository } from "./procedures";
 
-const cli = new Cli();
-
 const CREATE_COMMANDS: ICommands = {
-  "post": async (args, kwargs) => {
+  "post": async (cli, args, kwargs) => {
     const repo = await getRepository();
     const note: string = await cli.readLine("What do you want to say?");
     await createPost(repo, "note", {"body": note});
   },
-  "type": async (args, kwargs) => {
+  "type": async (cli, args, kwargs) => {
     if (args.length === 0) {
       console.debug(args);
       return;
@@ -23,13 +21,13 @@ const CREATE_COMMANDS: ICommands = {
 };
 
 const BASE_COMMANDS: ICommands = {
-  "create": async (args, kwargs) => {
-    await Cli.processCommand(CREATE_COMMANDS, args, kwargs);
+  "create": async (cli, args, kwargs) => {
+    await Cli.processCommand(CREATE_COMMANDS, cli, args, kwargs);
   },
-  "generate-id": async () => {
+  "generate-id": async (cli) => {
     cli.write(generateId());
   },
-  "init": async () => {
+  "init": async (cli) => {
     const repositoryDir: string = await cli.readLine("Where should the data live?");
     await createRepository(repositoryDir);
   }
@@ -37,8 +35,7 @@ const BASE_COMMANDS: ICommands = {
 
 const main = async () => {
   const {args, kwargs} = Cli.parseArguments();
-  await Cli.processCommand(BASE_COMMANDS, args, kwargs);
-  cli.close();
+  await Cli.processCommand(BASE_COMMANDS, null, args, kwargs);
 };
 
 export default main;

@@ -1,9 +1,11 @@
+import { Cli } from "./cli";
+
 export interface ISettingsJSON {
   repositoryDir: string;
 }
 
 export interface ICommands {
-  [key: string]: (args: string[], kwargs: {[key: string]: string | boolean}) => Promise<void>;
+  [key: string]: (cli: Cli, args: string[], kwargs: {[key: string]: string | boolean}) => Promise<void>;
 }
 
 export interface IBaseJson {
