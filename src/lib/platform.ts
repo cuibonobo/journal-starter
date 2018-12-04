@@ -46,7 +46,7 @@ export const isFile = async (path: string): Promise<boolean> => {
   return new Promise<boolean>((resolve, reject) => {
     fs.lstat(path, (err: NodeJS.ErrnoException, stats: fs.Stats) => {
       if (err) {
-        if(err.code == 'ENOENT'){
+        if(err.code === 'ENOENT'){
           return resolve(false);
         }
         return reject(err);
@@ -60,7 +60,7 @@ export const isDirectory = async (path: string): Promise<boolean> => {
   return new Promise<boolean>((resolve, reject) => {
     fs.lstat(path, (err: NodeJS.ErrnoException, stats: fs.Stats) => {
       if (err) {
-        if(err.code == 'ENOENT'){
+        if(err.code === 'ENOENT'){
           return resolve(false);
         }
         return reject(err);

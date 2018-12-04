@@ -1,7 +1,7 @@
 import { Cli } from "./lib/cli";
 import { generateId } from "./lib/id";
 import { ICommands } from "./lib/interfaces";
-import { createPost, createRepository, getRepository } from "./procedures";
+import { createPost, createRepository, createType, getRepository } from "./procedures";
 
 const CREATE_COMMANDS: ICommands = {
   "post": async (cli, args, kwargs) => {
@@ -14,9 +14,7 @@ const CREATE_COMMANDS: ICommands = {
       console.debug(args);
       return;
     }
-    const data = cli.readBody("Define your type above.");
-    console.debug(`New type: ${args[0]}`);
-    console.debug(JSON.parse(data));
+    await createType(cli, args[0]);
   }
 };
 

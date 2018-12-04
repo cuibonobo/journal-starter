@@ -3,17 +3,21 @@ import { createDirectory, writeFile } from "../lib/platform";
 import Post from "./Post";
 
 export default class Repository {
+;
+  public readonly postsDir: string;
+  public readonly typesDir: string;
   private repositorydir: string;
 
   constructor(repositoryDir: string) {
     this.repositorydir = repositoryDir;
+    this.postsDir = path.join(this.repositorydir, "posts");
+    this.typesDir = path.join(this.repositorydir, "types");
   }
 
   public async initializeRepository() {
-    await createDirectory(path.join(this.repositorydir, "posts"));
-    await createDirectory(path.join(this.repositorydir, "types"));
-  };
-
+    await createDirectory(this.postsDir);
+    await createDirectory(this.typesDir);
+  }
   public async savePost(post: Post) {
     const postId = post.id;
     const dir1 = postId.substr(0, 3);

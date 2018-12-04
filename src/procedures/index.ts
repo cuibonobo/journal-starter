@@ -1,4 +1,8 @@
+import * as path from "path";
+import * as punycode from "punycode";
+import { Cli } from "../lib/cli";
 import { IBaseJson } from "../lib/interfaces";
+import { isFile, writeFile } from "../lib/platform";
 import { Post, Repository, Settings } from "../models";
 
 export const getRepository = async () => {
@@ -18,4 +22,66 @@ export const createPost = async (repo: Repository, postType:string, content: IBa
   const post = Post.generatePost(postType, content);
   await repo.savePost(post);
   return post;
+};
+
+export const checkTypeName = (typeName: string): string | null => {
+  // Make sure this is a domain-safe name. Regex from https://thekevinscott.com/emojis-in-javascript/#writing-a-regular-expression
+  const r = new RegExp(/(?:[\w\-\.]|(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?(?:\u200d(?:[^\ud800-\udfff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?)*)+/);
+  const match = r.exec(typeName);
+  if (match === null) {
+    return "This is not a valid type name";
+  }
+  if (match.index > 0) {
+    return `Can't use that type name. Try again with '${match[0]}'.`;
+  }
+  if (typeName.startsWith('-') || typeName.endsWith('-')) {
+    return "A type name can't start or end with a hyphen.";
+  }
+  if (typeName.startsWith('.') || typeName.endsWith('.')) {
+    return "A type name can't start or end with a period.";
+  }
+  if ((typeName.length > 3 && typeName[2] === '-') || (typeName.length > 4 && typeName[3] === '-')) {
+    return "The 3rd or 4th characters in a type name cannot be hyphens.";
+  }
+  if (match[0] !== match.input) {
+    return `Illegal characters in type name. Only the '${match[0]}' portion is permitted.`;
+  }
+  return null;
+};
+
+export const getTypeMetadata = async (name: string): Promise<{typeName: string, typeFilePath: string}> => {
+  const typeName = name.toLowerCase();
+  // Convert any Unicode characters to ASCII for the filename
+  const typeFileName = punycode.toASCII(typeName) + ".json";
+  const repo = await getRepository();
+  const typeFilePath = path.join(repo.typesDir, typeFileName);
+  return {typeName, typeFilePath};
+};
+
+export const createType = async (cli: Cli, name: string): Promise<void> => {
+  const checkMsg = checkTypeName(name);
+    if (checkMsg !== null) {
+      cli.write(checkMsg);
+      return;
+    }
+    const {typeName, typeFilePath} = await getTypeMetadata(name);
+    if (await isFile(typeFilePath)) {
+      // TODO: Allow overwriting or editing an existing type
+      cli.write("That type already exists!");
+      return;
+    }
+
+    const text = cli.readBody("Define your type above in JSON format.");
+    // TODO: Define an interface for type data
+    let data = {};
+    try {
+      data = JSON.parse(text);
+    } catch(err) {
+      // TODO: Allow fixing JSON errors
+      cli.write("Can't parse input as JSON!");
+      return;
+    }
+
+    await writeFile(typeFilePath, JSON.stringify(data));
+    cli.write(`New type created: ${typeName}`);
 };
