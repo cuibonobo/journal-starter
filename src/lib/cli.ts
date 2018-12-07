@@ -40,6 +40,18 @@ export class Cli {
     });
   }
 
+  public readAnswer = async (questionText: string, options: string[]): Promise<string> => {
+    const answers = options.map((value: string) => value.toLowerCase());
+    const text = `${questionText} (${options.join(", ")})`;
+    let answer: string;
+    let idx: number = -1;
+    while(idx < 0) {
+      answer = await this.readLine(text);
+      idx = answers.indexOf(answer.toLowerCase());
+    }
+    return new Promise<string>((resolve) => resolve(options[idx]));
+  };
+
   public readLine = async (questionText?: string): Promise<string> => {
     let text = "";
     if (questionText !== undefined) {
@@ -50,14 +62,19 @@ export class Cli {
     });
   };
 
-  public readBody = (questionText?: string): string => {
-    let text = "";
-    if (questionText !== undefined) {
-      text = "\n\n# " + questionText;
+  public readBody = (bodyText?: string, commentText?: string): string => {
+    let body = "";
+    let comment = "";
+    if (bodyText !== undefined) {
+      body = bodyText;
+    }
+    if (commentText !== undefined) {
+      comment = "\n\n# " + commentText;
+      body += comment;
     }
     try {
-      const data = edit(text);
-      const idx = data.indexOf(text);
+      const data = edit(body);
+      const idx = data.indexOf(comment);
       if (idx > -1) {
         return data.substr(0, idx);
       }

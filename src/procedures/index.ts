@@ -2,7 +2,7 @@ import * as path from "path";
 import * as punycode from "punycode";
 import { Cli } from "../lib/cli";
 import { IBaseJson } from "../lib/interfaces";
-import { isFile, writeFile } from "../lib/platform";
+import { isFile, readFile, writeFile } from "../lib/platform";
 import { Post, Repository, Settings } from "../models";
 
 export const getRepository = async () => {
@@ -59,29 +59,45 @@ export const getTypeMetadata = async (name: string): Promise<{typeName: string, 
 };
 
 export const createType = async (cli: Cli, name: string): Promise<void> => {
+  let signal = false;
   const checkMsg = checkTypeName(name);
-    if (checkMsg !== null) {
-      cli.write(checkMsg);
-      return;
-    }
-    const {typeName, typeFilePath} = await getTypeMetadata(name);
-    if (await isFile(typeFilePath)) {
-      // TODO: Allow overwriting or editing an existing type
-      cli.write("That type already exists!");
-      return;
-    }
+  if (checkMsg !== null) {
+    cli.write(checkMsg);
+    return;
+  }
+  const {typeName, typeFilePath} = await getTypeMetadata(name);
+  let bodyText: string = "";
+  if (await isFile(typeFilePath)) {
+    const fileData = await readFile(typeFilePath);
+    const existsOpts: {[key: string]: () => void} = {
+      "Edit": () => {
+        bodyText = fileData;
+      },
+      "Overwrite": () => {
+        // Keep body text blank
+      },
+      "Quit": () => {
+        signal = true;
+      }
+    };
+    const answer = await cli.readAnswer(`Type ${typeName} already exists! What would you like to do?`, Object.keys(existsOpts));
+    existsOpts[answer]();
+  }
+  if (signal) {
+    return;
+  }
 
-    const text = cli.readBody("Define your type above in JSON format.");
-    // TODO: Define an interface for type data
-    let data = {};
-    try {
-      data = JSON.parse(text);
-    } catch(err) {
-      // TODO: Allow fixing JSON errors
-      cli.write("Can't parse input as JSON!");
-      return;
-    }
+  const text = cli.readBody(bodyText, "Define your type above in JSON format.");
+  // TODO: Define an interface for type data
+  let data = {};
+  try {
+    data = JSON.parse(text);
+  } catch(err) {
+    // TODO: Allow fixing JSON errors
+    cli.write("Can't parse input as JSON!");
+    return;
+  }
 
-    await writeFile(typeFilePath, JSON.stringify(data));
-    cli.write(`New type created: ${typeName}`);
+  await writeFile(typeFilePath, JSON.stringify(data, null, 4));
+  cli.write(`New type created: ${typeName}`);
 };
