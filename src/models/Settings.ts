@@ -1,5 +1,5 @@
 import * as path from "path";
-import { ISettingsJSON } from "../lib/interfaces";
+import { ISettingsJSON } from "../lib/interfaces/data";
 import { getUserDataDir, isFile, readFile, writeFile } from "../lib/platform";
 
 export default class Settings {

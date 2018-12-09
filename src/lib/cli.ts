@@ -1,7 +1,7 @@
 import { edit } from "external-editor";
 import * as minimist from "minimist";
 import * as readline from "readline";
-import { ICommands } from "../lib/interfaces";
+import { ICommands } from "./interfaces/functions";
 
 export class Cli {
   public static parseArguments = (): {args: string[], kwargs:{[key:string]: string | boolean}} => {

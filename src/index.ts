@@ -1,6 +1,6 @@
 import { Cli } from "./lib/cli";
 import { generateId } from "./lib/id";
-import { ICommands } from "./lib/interfaces";
+import { ICommands } from "./lib/interfaces/functions";
 import { createPost, createRepository, createType, getRepository } from "./procedures";
 
 const CREATE_COMMANDS: ICommands = {

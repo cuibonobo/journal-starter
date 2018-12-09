@@ -1,5 +1,5 @@
 import { generateId } from "../lib/id";
-import { IBaseJson, IPostJson } from "../lib/interfaces";
+import { IBaseJson, IPostJson } from "../lib/interfaces/data";
 
 export default class Post {
   public static generatePost(type: string, content: IBaseJson) {

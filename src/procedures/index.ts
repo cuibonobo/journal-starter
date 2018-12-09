@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as punycode from "punycode";
 import { Cli } from "../lib/cli";
-import { IBaseJson } from "../lib/interfaces";
+import { IBaseJson } from "../lib/interfaces/data";
 import { isFile, readFile, writeFile } from "../lib/platform";
 import { Post, Repository, Settings } from "../models";
 
