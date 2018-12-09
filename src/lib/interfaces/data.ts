@@ -10,6 +10,11 @@ export interface IPostJson {
   content: IBaseJson;
 }
 
-export interface ISettingsJSON {
+export interface ISettingsJson {
   repositoryDir: string;
+}
+
+export interface ITypeJson {
+  name: string;
+  definition: IBaseJson;
 }

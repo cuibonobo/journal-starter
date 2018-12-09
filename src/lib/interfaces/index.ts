@@ -1,4 +1,4 @@
-import { IBaseJson, IPostJson, ISettingsJSON } from "./data";
+import { IBaseJson, IPostJson, ISettingsJson } from "./data";
 import { ICommands } from "./functions";
 
-export { IBaseJson, ICommands, IPostJson, ISettingsJSON };
+export { IBaseJson, ICommands, IPostJson, ISettingsJson };
