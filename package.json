@@ -36,6 +36,7 @@
   "dependencies": {
     "external-editor": "^3.0.3",
     "minimist": "^1.2.0",
-    "punycode": "^2.1.1"
+    "punycode": "^2.1.1",
+    "ste-events": "^1.4.6"
   }
 }

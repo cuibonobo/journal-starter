@@ -1,39 +1,37 @@
+import App from "./App";
 import { Cli } from "./lib/cli";
 import { generateId } from "./lib/id";
-import { ICommands } from "./lib/interfaces/functions";
-import { createPost, createRepository, createType, getRepository } from "./procedures";
-
-const CREATE_COMMANDS: ICommands = {
-  "post": async (cli, args, kwargs) => {
-    const repo = await getRepository();
-    const note: string = await cli.readLine("What do you want to say?");
-    await createPost(repo, "note", {"body": note});
-  },
-  "type": async (cli, args, kwargs) => {
-    if (args.length === 0) {
-      console.debug(args);
-      return;
-    }
-    await createType(cli, args[0]);
-  }
-};
-
-const BASE_COMMANDS: ICommands = {
-  "create": async (cli, args, kwargs) => {
-    await Cli.processCommand(CREATE_COMMANDS, cli, args, kwargs);
-  },
-  "generate-id": async (cli) => {
-    cli.write(generateId());
-  },
-  "init": async (cli) => {
-    const repositoryDir: string = await cli.readLine("Where should the data live?");
-    await createRepository(repositoryDir);
-  }
-};
+import { ICommandArgs } from "./lib/interfaces";
+import subscriptions from "./subscriptions";
 
 const main = async () => {
-  const {args, kwargs} = Cli.parseArguments();
-  await Cli.processCommand(BASE_COMMANDS, null, args, kwargs);
+  const cli = new Cli();
+  let opts: ICommandArgs;
+  try {
+    opts = Cli.parseArguments();
+  } catch(err) {
+    console.debug("You must provide a command!");
+    return;
+  }
+  
+  switch(opts.command) {
+    case "generate-id":
+      cli.write(generateId());
+      break;
+    case "init":
+      const repositoryDir: string = await cli.readLine("Where should the data live?");
+      await App.generateApp(cli, repositoryDir);
+      break;
+    case undefined:
+      cli.close();
+      return;
+    default:
+      const app: App = await App.generateApp(cli);
+      subscriptions(app);
+      app.events.dispatchEvent(opts.command, {args: opts.args, kwargs: opts.kwargs});
+      await app.processInteraction(Cli.parseArguments({args: opts.args, kwargs: opts.kwargs}));
+  }
+  cli.close();
 };
 
 export default main;

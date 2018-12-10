@@ -2,7 +2,7 @@ import * as path from "path";
 import * as punycode from "punycode";
 import { Repository } from ".";
 import { ValidationError } from "../lib/errors";
-import { IBaseJson, ITypeJson } from "../lib/interfaces/data";
+import { IBaseJson, ITypeJson } from "../lib/interfaces";
 
 export default class Type {
   public static getMetadata = (repo: Repository, name: string): {typeName: string, typeFilePath: string} => {

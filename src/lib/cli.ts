@@ -1,34 +1,24 @@
 import { edit } from "external-editor";
 import * as minimist from "minimist";
 import * as readline from "readline";
-import { ICommands } from "./interfaces/functions";
+import { IArgs, ICommandArgs } from "./interfaces";
 
 export class Cli {
-  public static parseArguments = (): {args: string[], kwargs:{[key:string]: string | boolean}} => {
-    const baseArgs = minimist(process.argv.slice(2));
-    const args = [...baseArgs._];
-    const kwargs = {...baseArgs};
-    delete kwargs._;
-    return {args, kwargs};
-  };
-
-  public static processCommand = async (commands:ICommands, cli: Cli | null, args:string[], kwargs:{[key:string]: string | boolean}) => {
-    if (args.length > 0 && Object.keys(commands).indexOf(args[0]) > -1) {
-      // Keep track of whether the CLI was created here or passed in
-      let isBase = false;
-      if (cli === null) {
-        cli = new Cli();
-        isBase = true;
-      }
-      const command = args[0];
-      await commands[command](cli, args.slice(1), kwargs);
-      // If this was the level where the CLI was created, close the CLI
-      if (isBase) {
-        cli.close();
-      }
+  public static parseArguments = (opts?: IArgs): ICommandArgs => {
+    let args;
+    let kwargs;
+    if (opts === undefined) {
+      const baseArgs = minimist(process.argv.slice(2));
+      args = [...baseArgs._];
+      kwargs = {...baseArgs};
     } else {
-      console.debug(args, kwargs);
+      args = opts.args;
+      kwargs = opts.kwargs;
     }
+    const command = args[0];
+    args = args.slice(1);
+    delete kwargs._;
+    return {command, args, kwargs};
   };
 
   private rl:readline.ReadLine;
