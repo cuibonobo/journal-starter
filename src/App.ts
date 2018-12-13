@@ -1,5 +1,5 @@
 import { Cli } from "./lib/cli";
-import EventManager from "./lib/events";
+import { EventManager } from "./lib/events";
 import { IArgs, ICommandArgs } from "./lib/interfaces";
 import { Repository, Settings } from "./models";
 
