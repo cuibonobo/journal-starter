@@ -31,8 +31,7 @@ const main = async () => {
     default:
       const app: App = await App.generateApp();
       subscriptions(app);
-      app.events.dispatchEvent(opts.command, {args: opts.args, kwargs: opts.kwargs});
-      await app.processInteraction(Cli.parseArguments({args: opts.args, kwargs: opts.kwargs}));
+      await app.events.dispatchEvent(opts.command, {args: opts.args, kwargs: opts.kwargs});
   }
 };
 

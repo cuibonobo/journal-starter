@@ -1,6 +1,5 @@
 import { Cli } from "./lib/cli";
 import EventManager from "./lib/events";
-import { ICommandArgs } from "./lib/interfaces";
 import { Repository, Settings } from "./models";
 
 export default class App {
@@ -55,14 +54,5 @@ export default class App {
       this.cli.write(message);
     }
     this.cli.close();
-  }; 
-
-  public processInteraction = async (interaction: ICommandArgs): Promise<void> => {
-    const {command, args, kwargs} = interaction;
-    if (command === undefined) {
-      this.close();
-      return;
-    }
-    await this.events.dispatchEvent(command, {args, kwargs});
-  }
+  };
 }
