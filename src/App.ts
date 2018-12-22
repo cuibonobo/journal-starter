@@ -4,7 +4,7 @@ import { ICommandArgs } from "./lib/interfaces";
 import { Repository, Settings } from "./models";
 
 export default class App {
-  public static generateApp = async (cli: Cli, repositoryDir?: string) => {
+  public static generateApp = async (repositoryDir?: string) => {
     let settings: Settings;
     let repo: Repository;
     if (repositoryDir !== undefined) {
@@ -14,7 +14,7 @@ export default class App {
       settings = await App.getSettings();
       repo = await App.getRepository(settings);
     }
-    return new App(cli, settings, repo);
+    return new App(settings, repo);
   };
 
   private static createRepository = async (repositoryDir: string): Promise<Repository> => {
@@ -43,23 +43,26 @@ export default class App {
   public readonly settings: Settings;
   public readonly repository: Repository;
 
-  constructor(cli: Cli, settings: Settings, repository: Repository) {
-    this.cli = cli;
+  constructor(settings: Settings, repository: Repository) {
+    this.cli = new Cli();
     this.settings = settings;
     this.repository = repository;
     this.events = new EventManager<App>(this);
   }
 
   public close = (message?: string) => {
-    let opts: IArgs | undefined;
     if (message !== undefined) {
-      opts = {args: [message], kwargs: {}};
+      this.cli.write(message);
     }
-    this.events.dispatchEvent("close", opts);
-  };
+    this.cli.close();
+  }; 
 
   public processInteraction = async (interaction: ICommandArgs): Promise<void> => {
     const {command, args, kwargs} = interaction;
+    if (command === undefined) {
+      this.close();
+      return;
+    }
     await this.events.dispatchEvent(command, {args, kwargs});
     return new Promise<void>((resolve, reject) => {
       this.events.getEvent("close").one((a, k) => {

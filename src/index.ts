@@ -5,7 +5,7 @@ import { ICommandArgs } from "./lib/interfaces";
 import subscriptions from "./subscriptions";
 
 const main = async () => {
-  const cli = new Cli();
+  let cli: Cli;
   let opts: ICommandArgs;
   try {
     opts = Cli.parseArguments();
@@ -16,22 +16,24 @@ const main = async () => {
   
   switch(opts.command) {
     case "generate-id":
+      cli = new Cli();
       cli.write(generateId());
+      cli.close();
       break;
     case "init":
+      cli = new Cli();
       const repositoryDir: string = await cli.readLine("Where should the data live?");
-      await App.generateApp(cli, repositoryDir);
+      cli.close();
+      await App.generateApp(repositoryDir);
       break;
     case undefined:
-      cli.close();
-      return;
+      break;
     default:
-      const app: App = await App.generateApp(cli);
+      const app: App = await App.generateApp();
       subscriptions(app);
       app.events.dispatchEvent(opts.command, {args: opts.args, kwargs: opts.kwargs});
       await app.processInteraction(Cli.parseArguments({args: opts.args, kwargs: opts.kwargs}));
   }
-  cli.close();
 };
 
 export default main;
