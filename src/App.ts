@@ -64,13 +64,5 @@ export default class App {
       return;
     }
     await this.events.dispatchEvent(command, {args, kwargs});
-    return new Promise<void>((resolve, reject) => {
-      this.events.getEvent("close").one((a, k) => {
-        if (k.args.length > 0) {
-          this.cli.write(k.args[0]);
-        }
-        resolve();
-      })
-    });
   }
 }

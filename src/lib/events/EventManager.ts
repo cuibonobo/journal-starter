@@ -15,11 +15,14 @@ export default class EventManager<TCaller> {
   }
 
   public dispatchEvent = async (name: string, args?: IArgs): Promise<void> => {
+    if (name === undefined) {
+      return;
+    }
     if (args === undefined) {
       args = {args: [], kwargs: {}};
     }
-    console.debug("dispatchEvent", name, args);
-    this.eventList.get(name).dispatchAsync(this.instance, args);
+    // DEBUG: console.debug("dispatchEvent", name, args);
+    await this.eventList.get(name).dispatchAsync(this.instance, args);
   };
 
   public on<TEventType extends (c: TCaller, a: IBaseJson)=>void>(handler: TEventType) {

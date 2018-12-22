@@ -17,6 +17,7 @@ const subscriptions = (app: App) => {
         a.events.dispatchEvent("createType", {args, kwargs});
         break;
       default:
+        console.debug(k);
         a.close();
     }
   });
