@@ -1,4 +1,5 @@
 import EventManager from "./EventManager";
 import { PostCreate, PostUpdate, TypeCreate, TypeUpdate } from "./eventTypes";
 
-export { EventManager, PostCreate, PostUpdate, TypeCreate, TypeUpdate };
+export default EventManager;
+export { PostCreate, PostUpdate, TypeCreate, TypeUpdate };

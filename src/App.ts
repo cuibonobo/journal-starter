@@ -1,6 +1,6 @@
 import { Cli } from "./lib/cli";
-import { EventManager } from "./lib/events";
-import { IArgs, ICommandArgs } from "./lib/interfaces";
+import EventManager from "./lib/events";
+import { ICommandArgs } from "./lib/interfaces";
 import { Repository, Settings } from "./models";
 
 export default class App {

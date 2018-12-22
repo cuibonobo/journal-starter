@@ -3,10 +3,11 @@ import { IArgs, IBaseJson } from "../interfaces";
 
 export default class EventManager<TCaller> {
   private instance: TCaller;
-  private eventList = new EventList<TCaller, IArgs>();
+  private eventList: EventList<TCaller, IArgs>;
 
   constructor(instance: TCaller) {
     this.instance = instance;
+    this.eventList = new EventList<TCaller, IArgs>();
   }
 
   public getEvent = (name: string): IEvent<TCaller, IArgs> => {
