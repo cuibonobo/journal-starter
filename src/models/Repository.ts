@@ -20,25 +20,35 @@ export default class Repository {
     await createDirectory(this.typesDir);
   };
 
-  public getPostDirectory = (postId: string): string => {
+  public async save<TModel>(model: TModel) {
+    if (model instanceof Post) {
+      await this.savePost(model);
+    } else if (model instanceof Type) {
+      await this.saveType(model);
+    }
+  }
+
+  public getPath<TModel>(model: TModel): string {
+    if (model instanceof Post) {
+      return this.getPostPath(model.id);
+    } else if (model instanceof Type) {
+      return this.getTypePath(model.name);
+    }
+    return "";
+  }
+
+  private getPostDirectory = (postId: string): string => {
     const dir1 = postId.substr(0, 3);
     const dir2 = postId.substr(3, 3);
     return path.join(this.postsDir, dir1, dir2);
   };
 
-  public getPostPath = (postId: string): string => {
+  private getPostPath = (postId: string): string => {
     const postDir = this.getPostDirectory(postId);
     return path.join(postDir, `${postId}.json`);
   };
 
-  public savePost = async (post: Post): Promise<void> => {
-    const postId = post.id;
-    const postFilename = this.getPostPath(postId);
-    await createDirectory(this.getPostDirectory(postId));
-    await writeFile(postFilename, JSON.stringify(post));
-  };
-
-  public getTypePath = (name: string): string => {
+  private getTypePath = (name: string): string => {
     const typeName = Type.validateName(name);
     // Convert any Unicode characters to ASCII for the filename
     const typeFileName = punycode.toASCII(typeName) + ".json";
@@ -46,7 +56,14 @@ export default class Repository {
     return typeFilePath;
   };
 
-  public saveType = async (type: Type) => {
+  private savePost = async (post: Post): Promise<void> => {
+    const postId = post.id;
+    const postFilename = this.getPostPath(postId);
+    await createDirectory(this.getPostDirectory(postId));
+    await writeFile(postFilename, JSON.stringify(post));
+  };
+
+  private saveType = async (type: Type) => {
     const typeFilePath = this.getTypePath(type.name);
     await writeFile(typeFilePath, JSON.stringify(type.definition, null, 4));
   };

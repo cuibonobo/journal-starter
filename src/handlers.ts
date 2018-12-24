@@ -6,64 +6,51 @@ import { Post, Type } from "./models";
 export const createPost = async (app: App, args: IArgs) => {
   const body = await app.cli.readLine("What would you like to say?");
   const post = Post.generatePost(args.args[0], {"body": body});
-  await app.repository.savePost(post);
+  await app.repository.save(post);
   app.close();
 };
 
 export const createType = async (app: App, args: IArgs) => {
-  let name = args.args[0];
+  const name = args.args[0];
   if (name === undefined) {
     app.close("You must specify a type name!");
     return;
   }
+  let type: Type;
   try {
-    name = Type.validateName(name);
+    type = new Type({name, definition: {}});
   } catch (err) {
     app.cli.write(err);
     app.close();
     return;
   }
-  const typeFilePath = app.repository.getTypePath(name);
-  const comment: string = "Define your type above in JSON format.";
+  const typeFilePath = app.repository.getPath(type);
   let oldText: string = "";
   if (await isFile(typeFilePath)) {
     oldText = await readFile(typeFilePath);
   }
-  if (oldText.length === 0) {
-    const newText = app.cli.readBody("", comment);
-    app.events.dispatchEvent("saveType", {args: [name, typeFilePath, newText], kwargs: {}});
-    return;
-  }
-  const existsOpts: {[key: string]: () => void} = {
-    "Edit": () => {
-      const newText = app.cli.readBody(oldText, comment);
-      app.events.dispatchEvent("saveType", {args: [name, typeFilePath, newText], kwargs: {}});
-    },
-    "Overwrite": () => {
-      const newText = app.cli.readBody("", comment);
-      app.events.dispatchEvent("saveType", {args: [name, typeFilePath, newText], kwargs: {}});
-    },
-    "Quit": () => {
+  let existingType = false;
+  if (oldText.length !== 0) {
+    existingType = true;
+    const answer = await app.cli.readAnswer(`Type ${name} already exists! Edit?`, ['Y', 'N']);
+    if (answer === 'N'){
       app.close();
+      return;
     }
-  };
-  const answer = await app.cli.readAnswer(`Type ${name} already exists! What would you like to do?`, Object.keys(existsOpts));
-  existsOpts[answer]();  
-};
-
-export const saveType = async (app: App, args: IArgs) => {
-  const typeName = args.args[0];
-  const typeFilePath = args.args[1];
-  const text = args.args[2];
+  }
+  const newText = app.cli.readBody(oldText, "Define your type above in JSON format.");
   // TODO: Define an interface for type data
-  let data = {};
   try {
-    data = JSON.parse(text);
+    type.definition = JSON.parse(newText);
   } catch(err) {
     // TODO: Allow fixing JSON errors
     app.close("Can't parse input as JSON!");
     return;
   }
-  await writeFile(typeFilePath, JSON.stringify(data, null, 4));
-  app.close(`New type created: ${typeName}`);
+  app.repository.save(type);
+  if (existingType) {
+    app.close(`Existing type edited: ${type.name}`);
+  } else {
+    app.close(`New type created: ${type.name}`);
+  }
 };

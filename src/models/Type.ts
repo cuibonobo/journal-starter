@@ -28,10 +28,10 @@ export default class Type {
   };
 
   public readonly name: string;
-  public readonly definition: IBaseJson;
+  public definition: IBaseJson;
 
   constructor(typeData: ITypeJson) {
-    this.name = typeData.name;
+    this.name = Type.validateName(typeData.name.toLowerCase());
     this.definition = typeData.definition;
   }
 }
