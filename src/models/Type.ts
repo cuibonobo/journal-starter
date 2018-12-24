@@ -1,19 +1,8 @@
-import * as path from "path";
-import * as punycode from "punycode";
-import { Repository } from ".";
 import { ValidationError } from "../lib/errors";
 import { IBaseJson, ITypeJson } from "../lib/interfaces";
 
 export default class Type {
-  public static getMetadata = (repo: Repository, name: string): {typeName: string, typeFilePath: string} => {
-    const typeName = name.toLowerCase();
-    // Convert any Unicode characters to ASCII for the filename
-    const typeFileName = punycode.toASCII(typeName) + ".json";
-    const typeFilePath = path.join(repo.typesDir, typeFileName);
-    return {typeName, typeFilePath};
-  };
-
-  public static validateName = (name: string): void => {
+  public static validateName = (name: string): string => {
     // Make sure this is a domain-safe name. Regex from https://thekevinscott.com/emojis-in-javascript/#writing-a-regular-expression
     const r = new RegExp(/(?:[\w\-\.]|(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?(?:\u200d(?:[^\ud800-\udfff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?)*)+/);
     const match = r.exec(name);
@@ -35,6 +24,7 @@ export default class Type {
     if (match[0] !== match.input) {
       throw new ValidationError(`Illegal characters in type name. Only the '${match[0]}' portion is permitted.`);
     }
+    return name.toLowerCase();
   };
 
   public readonly name: string;

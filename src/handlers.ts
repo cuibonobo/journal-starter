@@ -11,19 +11,19 @@ export const createPost = async (app: App, args: IArgs) => {
 };
 
 export const createType = async (app: App, args: IArgs) => {
-  const name = args.args[0];
+  let name = args.args[0];
   if (name === undefined) {
     app.close("You must specify a type name!");
     return;
   }
   try {
-    Type.validateName(name);
+    name = Type.validateName(name);
   } catch (err) {
     app.cli.write(err);
     app.close();
     return;
   }
-  const {typeName, typeFilePath} = Type.getMetadata(app.repository, name);
+  const typeFilePath = app.repository.getTypePath(name);
   const comment: string = "Define your type above in JSON format.";
   let oldText: string = "";
   if (await isFile(typeFilePath)) {
@@ -31,23 +31,23 @@ export const createType = async (app: App, args: IArgs) => {
   }
   if (oldText.length === 0) {
     const newText = app.cli.readBody("", comment);
-    app.events.dispatchEvent("saveType", {args: [typeName, typeFilePath, newText], kwargs: {}});
+    app.events.dispatchEvent("saveType", {args: [name, typeFilePath, newText], kwargs: {}});
     return;
   }
   const existsOpts: {[key: string]: () => void} = {
     "Edit": () => {
       const newText = app.cli.readBody(oldText, comment);
-      app.events.dispatchEvent("saveType", {args: [typeName, typeFilePath, newText], kwargs: {}});
+      app.events.dispatchEvent("saveType", {args: [name, typeFilePath, newText], kwargs: {}});
     },
     "Overwrite": () => {
       const newText = app.cli.readBody("", comment);
-      app.events.dispatchEvent("saveType", {args: [typeName, typeFilePath, newText], kwargs: {}});
+      app.events.dispatchEvent("saveType", {args: [name, typeFilePath, newText], kwargs: {}});
     },
     "Quit": () => {
       app.close();
     }
   };
-  const answer = await app.cli.readAnswer(`Type ${typeName} already exists! What would you like to do?`, Object.keys(existsOpts));
+  const answer = await app.cli.readAnswer(`Type ${name} already exists! What would you like to do?`, Object.keys(existsOpts));
   existsOpts[answer]();  
 };
 
