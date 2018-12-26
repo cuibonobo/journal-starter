@@ -1,28 +1,24 @@
 import App from "./App";
-import { IArgs } from "./lib/interfaces";
-import { isFile, readFile, writeFile } from "./lib/platform";
+import BaseApp from "./app";
+import { CreatePost, CreateType } from "./app";
+import { ValidationError } from "./lib/errors";
+import { isFile, readFile } from "./lib/platform";
 import { Post, Type } from "./models";
 
-export const createPost = async (app: App, args: IArgs) => {
-  const body = await app.cli.readLine("What would you like to say?");
-  const post = Post.generatePost(args.args[0], {"body": body});
+export const createPost: CreatePost = async (app: BaseApp, type: string) => {
+  const body = await (app as App).cli.readLine("What would you like to say?");
+  const post = Post.generatePost(type, {"body": body});
   await app.repository.save(post);
+  return post;
 };
 
-export const createType = async (app: App, args: IArgs) => {
-  const name = args.args[0];
+export const createType: CreateType = async (app: BaseApp, name: string) => {
+  const cliApp = app as App;
   if (name === undefined) {
-    app.cli.write("You must specify a type name!");
-    return;
+    throw new ValidationError("You must specify a type name!");
   }
-  let type: Type;
-  try {
-    type = new Type({name, definition: {}});
-  } catch (err) {
-    app.cli.write(err);
-    return;
-  }
-  const typeFilePath = app.repository.getPath(type);
+  const type: Type = new Type({name, definition: {}});
+  const typeFilePath = cliApp.repository.getPath(type);
   let oldText: string = "";
   if (await isFile(typeFilePath)) {
     oldText = await readFile(typeFilePath);
@@ -30,24 +26,24 @@ export const createType = async (app: App, args: IArgs) => {
   let existingType = false;
   if (oldText.length !== 0) {
     existingType = true;
-    const answer = await app.cli.readAnswer(`Type ${name} already exists! Edit?`, ['Y', 'N']);
+    const answer = await cliApp.cli.readAnswer(`Type ${name} already exists! Edit?`, ['Y', 'N']);
     if (answer === 'N'){
-      return;
+      throw new ValidationError();
     }
   }
-  const newText = app.cli.readBody(oldText, "Define your type above in JSON format.");
+  const newText = cliApp.cli.readBody(oldText, "Define your type above in JSON format.");
   // TODO: Define an interface for type data
   try {
     type.definition = JSON.parse(newText);
   } catch(err) {
     // TODO: Allow fixing JSON errors
-    app.cli.write("Can't parse input as JSON!");
-    return;
+    throw new ValidationError("Can't parse input as JSON!");
   }
-  app.repository.save(type);
+  cliApp.repository.save(type);
   if (existingType) {
-    app.cli.write(`Existing type edited: ${type.name}`);
+    cliApp.cli.write(`Existing type edited: ${type.name}`);
   } else {
-    app.cli.write(`New type created: ${type.name}`);
+    cliApp.cli.write(`New type created: ${type.name}`);
   }
+  return type;
 };
