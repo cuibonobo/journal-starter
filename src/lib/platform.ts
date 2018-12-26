@@ -1,4 +1,5 @@
-import * as fs from "fs";
+import * as fs from "graceful-fs";
+import * as writeFileAtomic from "write-file-atomic";
 
 /*
 From https://stackoverflow.com/questions/19275776/node-js-how-to-get-the-os-platforms-user-data-folder#26227660
@@ -21,7 +22,7 @@ export const getUserDataDir = (): string => {
 
 export const writeFile = async (path: string, data: string): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
-    fs.writeFile(path, data, (err) => {
+    writeFileAtomic(path, data, (err) => {
       if (err) {
         reject(err);
       } else {
