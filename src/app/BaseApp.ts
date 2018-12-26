@@ -1,11 +1,20 @@
 import { Repository, Settings } from "../models";
 
 export default class BaseApp {
-  public readonly settings: Settings;
-  public readonly repository: Repository;
+  private repository?: Repository;
 
-  constructor(settings: Settings, repository: Repository) {
-    this.settings = settings;
+  constructor(repository?: Repository) {
+    this.repository = repository;
+  }
+
+  get Repository(): Repository {
+    if (this.repository === undefined) {
+      throw new Error("Repository not defined!");
+    }
+    return this.repository;
+  };
+
+  set Repository(repository: Repository) {
     this.repository = repository;
   }
 }
