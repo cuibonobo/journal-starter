@@ -6,6 +6,9 @@ import { isFile, readFile } from "./lib/platform";
 import { Post, Type } from "./models";
 
 export const createPost: CreatePost = async (app: BaseApp, type: string) => {
+  if (type === undefined) {
+    throw new ValidationError("You must specify a post type!");
+  }
   const body = await App.readLine("What would you like to say?");
   const post = Post.generatePost(type, {"body": body});
   await app.Repository.save(post);

@@ -1,7 +1,10 @@
 import * as path from "path";
 import * as punycode from "punycode";
-import { createDirectory, writeFile } from "../lib/platform";
+import { createDirectory, readFile, writeFile } from "../lib/platform";
 import { Post, Type} from "../models";
+import { RepositoryError } from "../lib/errors";
+
+type Constructor<T = {}> = new (...args: any[]) => T;
 
 export default class Repository {
   public static createRepository = async (repositoryDir: string): Promise<Repository> => {
@@ -25,22 +28,42 @@ export default class Repository {
     await createDirectory(this.typesDir);
   };
 
-  public async save<TModel>(model: TModel) {
+  public async get<TModel>(classParam: Constructor<TModel>, arg: string): Promise<Post | Type> {
+    switch(classParam.name) {
+      case "Post":
+        return await this.getPost(arg);
+      case "Type":
+        return await this.getType(arg);
+    }
+    throw new RepositoryError(`No models of type ${classParam.name} in the repository!`);
+  }
+
+  public async save<TModel>(model: TModel): Promise<void> {
     if (model instanceof Post) {
       await this.savePost(model);
-    } else if (model instanceof Type) {
-      await this.saveType(model);
+      return;
     }
+    if (model instanceof Type) {
+      await this.saveType(model);
+      return;
+    }
+    throw new RepositoryError(`No models of type ${model.constructor.name} in the repository!`);
   }
 
   public getPath<TModel>(model: TModel): string {
     if (model instanceof Post) {
       return this.getPostPath(model.id);
     } else if (model instanceof Type) {
-      return this.getTypePath(model.name);
+      return this.getTypeFilePath(model.name);
     }
     return "";
   }
+
+  private getPost = async (postId: string): Promise<Post> => {
+    const postPath = this.getPostPath(postId);
+    const postText = await readFile(postPath);
+    return new Post(JSON.parse(postText));
+  };
 
   private getPostDirectory = (postId: string): string => {
     const dir1 = postId.substr(0, 3);
@@ -53,8 +76,15 @@ export default class Repository {
     return path.join(postDir, `${postId}.json`);
   };
 
-  private getTypePath = (name: string): string => {
+  private getType = async (name: string): Promise<Type> => {
     const typeName = Type.validateName(name);
+    const typeFilePath = this.getTypeFilePath(typeName);
+    const typeText = await readFile(typeFilePath);
+    const definition = JSON.parse(typeText);
+    return new Type({name: typeName, definition});
+  };
+
+  private getTypeFilePath = (typeName: string): string => {
     // Convert any Unicode characters to ASCII for the filename
     const typeFileName = punycode.toASCII(typeName) + ".json";
     const typeFilePath = path.join(this.typesDir, typeFileName);
@@ -63,13 +93,13 @@ export default class Repository {
 
   private savePost = async (post: Post): Promise<void> => {
     const postId = post.id;
-    const postFilename = this.getPostPath(postId);
+    const postPath = this.getPostPath(postId);
     await createDirectory(this.getPostDirectory(postId));
-    await writeFile(postFilename, JSON.stringify(post));
+    await writeFile(postPath, JSON.stringify(post));
   };
 
   private saveType = async (type: Type) => {
-    const typeFilePath = this.getTypePath(type.name);
+    const typeFilePath = this.getTypeFilePath(type.name);
     await writeFile(typeFilePath, JSON.stringify(type.definition, null, 4));
   };
 }
