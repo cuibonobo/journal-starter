@@ -1,5 +1,6 @@
+import { createPost, createType } from "./handlers";
 import { Cli } from "./lib/cli";
-import EventManager from "./lib/events";
+import { IArgs } from "./lib/interfaces";
 import { Repository, Settings } from "./models";
 
 export default class App {
@@ -7,38 +8,16 @@ export default class App {
     let settings: Settings;
     let repo: Repository;
     if (repositoryDir !== undefined) {
-      settings = await App.createSettings(repositoryDir);
-      repo = await App.createRepository(repositoryDir);
+      settings = await Settings.createSettings(repositoryDir);
+      repo = await Repository.createRepository(repositoryDir);
     } else {
-      settings = await App.getSettings();
-      repo = await App.getRepository(settings);
+      settings = await Settings.getSettings();
+      repo = await Repository.getRepository(settings);
     }
     return new App(settings, repo);
   };
 
-  private static createRepository = async (repositoryDir: string): Promise<Repository> => {
-    const repo = new Repository(repositoryDir);
-    await repo.initializeRepository();
-    return repo;
-  };
-
-  private static createSettings = async (repositoryDir: string): Promise<Settings> => {
-    const settings = await Settings.generateSettings(repositoryDir);
-    return new Settings(settings);
-  };
-
-  private static getRepository = async (settings: Settings): Promise<Repository> => {
-    return new Repository(settings.getRepositoryDir());
-  };
-
-  private static getSettings = async(): Promise<Settings> => {
-    const settings = new Settings();
-    await settings.readFromFile();
-    return settings;
-  };
-
   public readonly cli: Cli;
-  public readonly events: EventManager<App>;
   public readonly settings: Settings;
   public readonly repository: Repository;
 
@@ -46,13 +25,25 @@ export default class App {
     this.cli = new Cli();
     this.settings = settings;
     this.repository = repository;
-    this.events = new EventManager<App>(this);
   }
 
-  public close = (message?: string) => {
-    if (message !== undefined) {
-      this.cli.write(message);
+  public processInteraction = async (command: string, args: IArgs): Promise<void> => {
+    switch(command) {
+      case "create":
+        const opts = Cli.parseArguments({args: args.args, kwargs: args.kwargs});
+        switch(opts.command) {
+          case "post":
+            await createPost(this, {args: opts.args, kwargs: opts.kwargs});
+            break;
+          case "type":
+            await createType(this, {args: opts.args, kwargs: opts.kwargs});
+            break;
+          default:
+            console.debug(opts);
+        }
+        break;
+      default:
+        console.debug(command, args);
     }
-    this.cli.close();
   };
 }

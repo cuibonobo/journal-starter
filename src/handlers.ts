@@ -7,13 +7,12 @@ export const createPost = async (app: App, args: IArgs) => {
   const body = await app.cli.readLine("What would you like to say?");
   const post = Post.generatePost(args.args[0], {"body": body});
   await app.repository.save(post);
-  app.close();
 };
 
 export const createType = async (app: App, args: IArgs) => {
   const name = args.args[0];
   if (name === undefined) {
-    app.close("You must specify a type name!");
+    app.cli.write("You must specify a type name!");
     return;
   }
   let type: Type;
@@ -21,7 +20,6 @@ export const createType = async (app: App, args: IArgs) => {
     type = new Type({name, definition: {}});
   } catch (err) {
     app.cli.write(err);
-    app.close();
     return;
   }
   const typeFilePath = app.repository.getPath(type);
@@ -34,7 +32,6 @@ export const createType = async (app: App, args: IArgs) => {
     existingType = true;
     const answer = await app.cli.readAnswer(`Type ${name} already exists! Edit?`, ['Y', 'N']);
     if (answer === 'N'){
-      app.close();
       return;
     }
   }
@@ -44,13 +41,13 @@ export const createType = async (app: App, args: IArgs) => {
     type.definition = JSON.parse(newText);
   } catch(err) {
     // TODO: Allow fixing JSON errors
-    app.close("Can't parse input as JSON!");
+    app.cli.write("Can't parse input as JSON!");
     return;
   }
   app.repository.save(type);
   if (existingType) {
-    app.close(`Existing type edited: ${type.name}`);
+    app.cli.write(`Existing type edited: ${type.name}`);
   } else {
-    app.close(`New type created: ${type.name}`);
+    app.cli.write(`New type created: ${type.name}`);
   }
 };

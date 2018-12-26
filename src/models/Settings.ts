@@ -6,11 +6,17 @@ export default class Settings {
   public static readonly filename: string = "journal.json";
   public static readonly filePath = path.join(getUserDataDir(), Settings.filename);
 
-  public static async generateSettings(repositoryDir: string): Promise<ISettingsJson> {
-    const obj:ISettingsJson = {repositoryDir};
-    await writeFile(Settings.filePath, JSON.stringify(obj));
-    return obj;
-  }
+  public static createSettings = async (repositoryDir: string): Promise<Settings> => {
+    const settings = new Settings({repositoryDir});
+    settings.save();
+    return settings;
+  };
+
+  public static getSettings = async(): Promise<Settings> => {
+    const settings = new Settings();
+    await settings.initialize();
+    return settings;
+  };
 
   private settings?:ISettingsJson;
 
@@ -18,16 +24,20 @@ export default class Settings {
     this.settings = settings;
   }
 
-  public async readFromFile() {
-    if (await isFile(Settings.filePath)) {
-      this.settings = JSON.parse(await readFile(Settings.filePath));
-    }
-  }
-
   public getRepositoryDir(): string {
     if (this.settings === undefined) {
       throw new Error("No repository defined!");
     }
     return this.settings.repositoryDir;
+  }
+
+  private async save(): Promise<void> {
+    await writeFile(Settings.filePath, JSON.stringify(this.settings));
+  }
+
+  private async initialize() {
+    if (await isFile(Settings.filePath)) {
+      this.settings = JSON.parse(await readFile(Settings.filePath));
+    }
   }
 }

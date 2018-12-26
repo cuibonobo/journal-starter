@@ -2,7 +2,6 @@ import App from "./App";
 import { Cli } from "./lib/cli";
 import { generateId } from "./lib/id";
 import { ICommandArgs } from "./lib/interfaces";
-import subscriptions from "./subscriptions";
 
 const main = async () => {
   let cli: Cli;
@@ -30,8 +29,8 @@ const main = async () => {
       break;
     default:
       const app: App = await App.generateApp();
-      subscriptions(app);
-      await app.events.dispatchEvent(opts.command, {args: opts.args, kwargs: opts.kwargs});
+      await app.processInteraction(opts.command, {args: opts.args, kwargs: opts.kwargs});
+      app.cli.close();
   }
 };
 

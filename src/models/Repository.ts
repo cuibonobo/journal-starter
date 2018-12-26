@@ -1,10 +1,19 @@
 import * as path from "path";
 import * as punycode from "punycode";
 import { createDirectory, writeFile } from "../lib/platform";
-import Post from "./Post";
-import Type from "./Type";
+import { Post, Settings, Type} from "../models";
 
 export default class Repository {
+  public static createRepository = async (repositoryDir: string): Promise<Repository> => {
+    const repo = new Repository(repositoryDir);
+    await repo.initializeRepository();
+    return repo;
+  };
+
+  public static getRepository = async (settings: Settings): Promise<Repository> => {
+    return new Repository(settings.getRepositoryDir());
+  };
+
   public readonly postsDir: string;
   public readonly typesDir: string;
   private repositorydir: string;
