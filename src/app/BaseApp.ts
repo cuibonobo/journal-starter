@@ -1,4 +1,4 @@
-import { Repository, Settings } from "../models";
+import { Repository } from "../models";
 
 export default class BaseApp {
   private repository?: Repository;

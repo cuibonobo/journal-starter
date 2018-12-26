@@ -3,24 +3,28 @@ import { ISettingsJson } from "../lib/interfaces";
 import { getUserDataDir, isFile, readFile, writeFile } from "../lib/platform";
 
 export default class Settings {
-  public static readonly filename: string = "journal.json";
-  public static readonly filePath = path.join(getUserDataDir(), Settings.filename);
-
-  public static createSettings = async (repositoryDir: string): Promise<Settings> => {
-    const settings = new Settings({repositoryDir});
+  public static createSettings = async (name: string, repositoryDir: string): Promise<Settings> => {
+    const settings = new Settings(name, {repositoryDir});
     settings.save();
     return settings;
   };
 
-  public static getSettings = async(): Promise<Settings> => {
-    const settings = new Settings();
+  public static getSettings = async(name: string): Promise<Settings> => {
+    const settings = new Settings(name);
     await settings.initialize();
     return settings;
   };
+  
+  public readonly filePath: string;
+  private name: string;
+  private filename: string;
 
   private settings?:ISettingsJson;
 
-  constructor(settings?: ISettingsJson) {
+  constructor(name: string, settings?: ISettingsJson) {
+    this.name = name;
+    this.filename = name + ".json";
+    this.filePath = path.join(getUserDataDir(), this.filename);
     this.settings = settings;
   }
 
@@ -32,12 +36,12 @@ export default class Settings {
   }
 
   private async save(): Promise<void> {
-    await writeFile(Settings.filePath, JSON.stringify(this.settings));
+    await writeFile(this.filePath, JSON.stringify(this.settings));
   }
 
   private async initialize() {
-    if (await isFile(Settings.filePath)) {
-      this.settings = JSON.parse(await readFile(Settings.filePath));
+    if (await isFile(this.filePath)) {
+      this.settings = JSON.parse(await readFile(this.filePath));
     }
   }
 }

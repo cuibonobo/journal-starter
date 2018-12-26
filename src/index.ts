@@ -1,5 +1,5 @@
 import App from "./App";
-import { ICommandArgs } from "./lib/interfaces";
+import { ICommandArgs } from "./App";
 
 const main = async () => {
   let opts: ICommandArgs;
@@ -10,17 +10,16 @@ const main = async () => {
     return;
   }
   
-  const app = new App();
   switch(opts.command) {
     case "init":
-      const repositoryDir: string = await app.readLine("Where should the data live?");
+      const repositoryDir: string = await App.readLine("Where should the data live?");
       await App.createApp(repositoryDir);
       break;
     case undefined:
       break;
     default:
       const repo = await App.getRepository();
-      app.Repository = repo;
+      const app = new App(repo);
       await app.processInteraction(opts.command, {args: opts.args, kwargs: opts.kwargs});
   }
 };

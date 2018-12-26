@@ -3,10 +3,20 @@ import * as minimist from "minimist";
 import * as readline from "readline";
 import BaseApp from "./app/BaseApp";
 import { createPost, createType } from "./handlers";
-import { IArgs, ICommandArgs, ISettingsJson } from "./lib/interfaces";
 import { Repository, Settings } from "./models";
 
+export interface IArgs {
+  args: string[];
+  kwargs: {[key: string]: string | boolean};
+}
+
+export interface ICommandArgs extends IArgs {
+  command: string;
+}
+
 export default class App extends BaseApp {
+  public static readonly appName: string = "journal";
+
   public static parseArguments = (opts?: IArgs): ICommandArgs => {
     let args;
     let kwargs;
@@ -25,35 +35,35 @@ export default class App extends BaseApp {
   };
 
   public static createApp = async (repositoryDir: string) => {
-    await Settings.createSettings(repositoryDir)
+    await Settings.createSettings(App.appName, repositoryDir)
     const repo: Repository = await Repository.createRepository(repositoryDir);
     return new App(repo);
   };
 
   public static getRepository = async () => {
-    const settings = await Settings.getSettings();
+    const settings = await Settings.getSettings(App.appName);
     return new Repository(settings.getRepositoryDir());
   };
 
-  public readAnswer = async (questionText: string, options: string[]): Promise<string> => {
+  public static readAnswer = async (questionText: string, options: string[]): Promise<string> => {
     const answers = options.map((value: string) => value.toLowerCase());
     const text = `${questionText} (${options.join(", ")})`;
     let answer: string;
     let idx: number = -1;
     while(idx < 0) {
-      answer = await this.readLine(text);
+      answer = await App.readLine(text);
       idx = answers.indexOf(answer.toLowerCase());
     }
     return new Promise<string>((resolve) => resolve(options[idx]));
   };
 
-  public readLine = async (questionText?: string): Promise<string> => {
+  public static readLine = async (questionText?: string): Promise<string> => {
     let text = "";
     if (questionText !== undefined) {
       text = questionText + "\n";
     }
     return new Promise((resolve: (input: string) => void, reject) => {
-      const rl = this.createInterface();
+      const rl = App.createInterface();
       rl.question(text, (input) => {
         resolve(input);
         rl.close();
@@ -61,7 +71,7 @@ export default class App extends BaseApp {
     });
   };
 
-  public readBody = (bodyText?: string, commentText?: string): string => {
+  public static readBody = (bodyText?: string, commentText?: string): string => {
     let body = "";
     let comment = "";
     if (bodyText !== undefined) {
@@ -84,10 +94,17 @@ export default class App extends BaseApp {
     }
   };
 
-  public write = (message: string): void => {
-    const rl = this.createInterface();
+  public static write = (message: string): void => {
+    const rl = App.createInterface();
     rl.write(message + "\n");
     rl.close();
+  };
+
+  public static createInterface = (): readline.ReadLine => {
+    return readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
   };
 
   public processInteraction = async (command: string, args: IArgs): Promise<void> => {
@@ -106,18 +123,11 @@ export default class App extends BaseApp {
               console.debug(opts);
           }
         } catch(err) {
-          this.write(err.message);
+          App.write(err.message);
         }
         break;
       default:
         console.debug(command, args);
     }
-  };
-
-  private createInterface = (): readline.ReadLine => {
-    return readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
   };
 }
