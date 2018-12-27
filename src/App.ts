@@ -3,7 +3,7 @@ import * as minimist from "minimist";
 import * as readline from "readline";
 import BaseApp from "./app/BaseApp";
 import { createPost, createType } from "./handlers";
-import { Repository, Settings } from "./models";
+import { Post, Repository, Settings, Type } from "./models";
 
 export interface IArgs {
   args: string[];
@@ -108,9 +108,9 @@ export default class App extends BaseApp {
   };
 
   public processInteraction = async (command: string, args: IArgs): Promise<void> => {
+    const opts = App.parseArguments(args);
     switch(command) {
       case "create":
-        const opts = App.parseArguments(args);
         try {
           switch(opts.command) {
             case "post":
@@ -118,6 +118,24 @@ export default class App extends BaseApp {
               break;
             case "type":
               await createType(this, opts.args[0]);
+              break;
+            default:
+              console.debug(opts);
+          }
+        } catch(err) {
+          App.write(err.message);
+        }
+        break;
+      case "list":
+        try {
+          switch(opts.command) {
+            case "posts":
+              const posts = await this.Repository.get(Post);
+              console.debug(posts);
+              break;
+            case "types":
+              const types = await this.Repository.get(Type);
+              console.debug(types);
               break;
             default:
               console.debug(opts);

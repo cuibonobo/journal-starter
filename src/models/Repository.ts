@@ -1,8 +1,9 @@
 import * as path from "path";
 import * as punycode from "punycode";
-import { createDirectory, readFile, writeFile } from "../lib/platform";
-import { Post, Type} from "../models";
 import { RepositoryError } from "../lib/errors";
+import { IBaseJson, ITypeJson } from "../lib/interfaces";
+import { createDirectory, readFile, walk, writeFile } from "../lib/platform";
+import { Post, Type} from "../models";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -28,12 +29,25 @@ export default class Repository {
     await createDirectory(this.typesDir);
   };
 
-  public async get<TModel>(classParam: Constructor<TModel>, arg: string): Promise<Post | Type> {
+  public async getOne<TModel>(classParam: Constructor<TModel>, arg: string): Promise<Post | Type> {
     switch(classParam.name) {
       case "Post":
-        return await this.getPost(arg);
+        return await this.getPostById(arg);
       case "Type":
-        return await this.getType(arg);
+        return await this.getTypeByName(arg);
+    }
+    throw new RepositoryError(`No models of type ${classParam.name} in the repository!`);
+  }
+
+  public async get<TModel>(classParam: Constructor<TModel>, query?: IBaseJson): Promise<Post[] | Type[]> {
+    if (query === undefined) {
+      query = {};
+    }
+    switch(classParam.name) {
+      case "Post":
+        return await this.queryPost(query);
+      case "Type":
+        return await this.queryType(query);
     }
     throw new RepositoryError(`No models of type ${classParam.name} in the repository!`);
   }
@@ -59,9 +73,13 @@ export default class Repository {
     return "";
   }
 
-  private getPost = async (postId: string): Promise<Post> => {
+  private getPostById = async (postId: string): Promise<Post> => {
     const postPath = this.getPostPath(postId);
-    const postText = await readFile(postPath);
+    return this.getPostByPath(postPath);
+  };
+
+  private getPostByPath = async (filePath: string): Promise<Post> => {
+    const postText = await readFile(filePath);
     return new Post(JSON.parse(postText));
   };
 
@@ -76,12 +94,16 @@ export default class Repository {
     return path.join(postDir, `${postId}.json`);
   };
 
-  private getType = async (name: string): Promise<Type> => {
+  private getTypeByName = async (name: string): Promise<Type> => {
     const typeName = Type.validateName(name);
     const typeFilePath = this.getTypeFilePath(typeName);
-    const typeText = await readFile(typeFilePath);
-    const definition = JSON.parse(typeText);
-    return new Type({name: typeName, definition});
+    return await this.getTypeByPath(typeFilePath);
+  };
+
+  private getTypeByPath = async (filePath: string): Promise<Type> => {
+    const typeText = await readFile(filePath);
+    const typeData: ITypeJson = JSON.parse(typeText);
+    return new Type(typeData);
   };
 
   private getTypeFilePath = (typeName: string): string => {
@@ -89,6 +111,26 @@ export default class Repository {
     const typeFileName = punycode.toASCII(typeName) + ".json";
     const typeFilePath = path.join(this.typesDir, typeFileName);
     return typeFilePath;
+  };
+
+  private queryPost = async (query: IBaseJson): Promise<Post[]> => {
+    const posts: Post[] = [];
+    await walk(this.postsDir, async (filename: string) => {
+      // TODO: Actually filter stuff based on the query!
+      const post = await this.getPostByPath(filename);
+      posts.push(post);
+    });
+    return posts;
+  };
+
+  private queryType = async (query: IBaseJson): Promise<Type[]> => {
+    const types: Type[] = [];
+    await walk(this.typesDir, async (filename: string) => {
+      // TODO: Actually filter stuff based on the query!
+      const type = await this.getTypeByPath(filename);
+      types.push(type);
+    });
+    return types;
   };
 
   private savePost = async (post: Post): Promise<void> => {
@@ -100,6 +142,6 @@ export default class Repository {
 
   private saveType = async (type: Type) => {
     const typeFilePath = this.getTypeFilePath(type.name);
-    await writeFile(typeFilePath, JSON.stringify(type.definition, null, 4));
+    await writeFile(typeFilePath, JSON.stringify(type, null, 4));
   };
 }

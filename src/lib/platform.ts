@@ -1,4 +1,5 @@
 import * as fs from "graceful-fs";
+import * as p from "path";
 import * as writeFileAtomic from "write-file-atomic";
 
 /*
@@ -20,14 +21,43 @@ export const getUserDataDir = (): string => {
   return `/home/${process.env.USER}/.config`
 };
 
+export const readDir = async (path: string): Promise<string[]> => {
+  return new Promise<string[]>((resolve, reject) => {
+    fs.readdir(path, {encoding: "utf8"}, (err, files) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(files)
+    });
+  });
+};
+
+export const walk = async (path: string, fileCb?: (filename: string) => Promise<void>, dirCb?: (dirName: string) => Promise<void>): Promise<void> => {
+  path = p.resolve(path);
+  const items: string[] = await readDir(path);
+  for (const item of items) {
+    const itemPath = p.join(path, item);
+    if (await isFile(itemPath)) {
+      if (fileCb !== undefined) {
+        await fileCb(itemPath);
+      }
+    }
+    if (await isDirectory(itemPath)) {
+      if (dirCb !== undefined) {
+        await dirCb(itemPath);
+      }
+      await walk(itemPath, fileCb, dirCb);
+    }
+  }
+};
+
 export const writeFile = async (path: string, data: string): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     writeFileAtomic(path, data, (err) => {
       if (err) {
-        reject(err);
-      } else {
-        resolve();
+        return reject(err);
       }
+      return resolve();
     });
   });
 };
@@ -38,7 +68,7 @@ export const readFile = async (path: string): Promise<string> => {
       if (err) {
         return reject(err);
       }
-      resolve(data.toString());
+      return resolve(data.toString());
     });
   });
 };
@@ -75,10 +105,9 @@ export const createDirectory = async (path: string): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     fs.mkdir(path, {recursive: true, mode: 0o755},(err) => {
       if (err) {
-        reject(err);
-      } else {
-        resolve();
+        return reject(err);
       }
+      return resolve();
     });
   });
 };
