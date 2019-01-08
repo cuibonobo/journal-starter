@@ -1,5 +1,5 @@
 import App from "./App";
-import { ICommandArgs } from "./App";
+import { ICommandArgs } from "./interfaces";
 
 const main = async () => {
   let opts: ICommandArgs;

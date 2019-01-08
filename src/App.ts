@@ -3,16 +3,7 @@ import * as minimist from "minimist";
 import * as readline from "readline";
 import BaseApp from "./app/BaseApp";
 import { createPost, createType } from "./handlers";
-import { Post, Repository, Settings, Type } from "./models";
-
-export interface IArgs {
-  args: string[];
-  kwargs: {[key: string]: string | boolean};
-}
-
-export interface ICommandArgs extends IArgs {
-  command: string;
-}
+import { IArgs, ICommandArgs } from "./interfaces";
 
 export default class App extends BaseApp {
   public static readonly appName: string = "journal";
@@ -107,42 +98,22 @@ export default class App extends BaseApp {
     });
   };
 
+  public runCommandCallback = async (app: App, opts: ICommandArgs, cb: (a: BaseApp, o: ICommandArgs) => Promise<void>) => {
+    try {
+      await cb(this, opts);
+    } catch(err) {
+      App.write(err.message);
+    }
+  }
+
   public processInteraction = async (command: string, args: IArgs): Promise<void> => {
     const opts = App.parseArguments(args);
     switch(command) {
       case "create":
-        try {
-          switch(opts.command) {
-            case "post":
-              await createPost(this, opts.args[0]);
-              break;
-            case "type":
-              await createType(this, opts.args[0]);
-              break;
-            default:
-              console.debug(opts);
-          }
-        } catch(err) {
-          App.write(err.message);
-        }
+        await this.runCommandCallback(this, opts, create);
         break;
       case "list":
-        try {
-          switch(opts.command) {
-            case "posts":
-              const posts = await this.Repository.get(Post);
-              console.debug(posts);
-              break;
-            case "types":
-              const types = await this.Repository.get(Type);
-              console.debug(types);
-              break;
-            default:
-              console.debug(opts);
-          }
-        } catch(err) {
-          App.write(err.message);
-        }
+        await this.runCommandCallback(this, opts, list);
         break;
       default:
         console.debug(command, args);
