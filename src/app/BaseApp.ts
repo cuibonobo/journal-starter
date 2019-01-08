@@ -1,10 +1,11 @@
-import { Repository } from "../models";
+import { Repository, Settings } from "../models";
 
-export default class BaseApp {
+export default abstract class BaseApp {
+  public readonly appName: string;
   private repository?: Repository;
 
-  constructor(repository?: Repository) {
-    this.repository = repository;
+  constructor(appName: string) {
+    this.appName = appName;
   }
 
   get Repository(): Repository {
@@ -16,5 +17,15 @@ export default class BaseApp {
 
   set Repository(repository: Repository) {
     this.repository = repository;
+  }
+
+  public createRepo = async (repositoryDir: string) => {
+    await Settings.createSettings(this.appName, repositoryDir)
+    this.repository = await Repository.createRepository(repositoryDir);
+  }
+
+  public init = async () => {
+    const settings = await Settings.getSettings(this.appName);
+    this.repository = new Repository(settings.repositoryDir);
   }
 }

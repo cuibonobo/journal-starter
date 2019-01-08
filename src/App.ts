@@ -2,12 +2,10 @@ import { edit } from "external-editor";
 import * as minimist from "minimist";
 import * as readline from "readline";
 import BaseApp from "./app/BaseApp";
-import { createPost, createType } from "./handlers";
+import { create, list } from "./commands";
 import { IArgs, ICommandArgs } from "./interfaces";
 
 export default class App extends BaseApp {
-  public static readonly appName: string = "journal";
-
   public static parseArguments = (opts?: IArgs): ICommandArgs => {
     let args;
     let kwargs;
@@ -23,17 +21,6 @@ export default class App extends BaseApp {
     args = args.slice(1);
     delete kwargs._;
     return {command, args, kwargs};
-  };
-
-  public static createApp = async (repositoryDir: string) => {
-    await Settings.createSettings(App.appName, repositoryDir)
-    const repo: Repository = await Repository.createRepository(repositoryDir);
-    return new App(repo);
-  };
-
-  public static getRepository = async () => {
-    const settings = await Settings.getSettings(App.appName);
-    return new Repository(settings.getRepositoryDir());
   };
 
   public static readAnswer = async (questionText: string, options: string[]): Promise<string> => {

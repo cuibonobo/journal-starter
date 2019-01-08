@@ -13,13 +13,13 @@ const main = async () => {
   switch(opts.command) {
     case "init":
       const repositoryDir: string = await App.readLine("Where should the data live?");
-      await App.createApp(repositoryDir);
+      await (new App("journal")).createRepo(repositoryDir);
       break;
     case undefined:
       break;
     default:
-      const repo = await App.getRepository();
-      const app = new App(repo);
+      const app = new App("journal");
+      await app.init();
       await app.processInteraction(opts.command, {args: opts.args, kwargs: opts.kwargs});
   }
 };

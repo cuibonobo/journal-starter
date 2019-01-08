@@ -28,7 +28,7 @@ export default class Settings {
     this.settings = settings;
   }
 
-  public getRepositoryDir(): string {
+  get repositoryDir(): string {
     if (this.settings === undefined) {
       throw new Error("No repository defined!");
     }

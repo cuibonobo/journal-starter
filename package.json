@@ -8,7 +8,7 @@
     "test": "jest --config jestconfig.json",
     "lint": "tslint -p tsconfig.json --fix",
     "build": "tsc",
-    "build-debug": "tsc -w"
+    "debug": "tsc -w"
   },
   "bin": {
     "journal": "./bin/journal"
