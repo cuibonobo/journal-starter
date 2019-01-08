@@ -1,7 +1,7 @@
 import App from "./App";
 import BaseApp from "./app";
 import { CreatePost, CreateType } from "./app";
-import { ValidationError } from "./lib/errors";
+import { ValidationError } from "./errors";
 import { isFile, readFile } from "./lib/platform";
 import { Post, Type } from "./models";
 

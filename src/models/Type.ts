@@ -1,4 +1,4 @@
-import { ValidationError } from "../lib/errors";
+import { ValidationError } from "../errors";
 import { IBaseJson, ITypeJson } from "../lib/interfaces";
 
 export default class Type {

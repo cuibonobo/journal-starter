@@ -1,6 +1,6 @@
 import * as path from "path";
 import * as punycode from "punycode";
-import { RepositoryError } from "../lib/errors";
+import { RepositoryError } from "../errors";
 import { IBaseJson, ITypeJson } from "../lib/interfaces";
 import { createDirectory, readFile, walk, writeFile } from "../lib/platform";
 import { Post, Type} from "../models";
