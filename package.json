@@ -38,7 +38,7 @@
   "dependencies": {
     "external-editor": "^3.0.3",
     "graceful-fs": "^4.1.15",
-    "minimist": "^1.2.3",
+    "minimist": "^1.2.6",
     "punycode": "^2.1.1",
     "write-file-atomic": "^2.3.0"
   }
